@@ -84,8 +84,6 @@ h1, h2, h3, h4 {
 }
 
 .header-inner {
-    max-width: var(--max-width);
-    margin: 0 auto;
     padding: 0.5rem 1rem;
     display: flex;
     align-items: center;
@@ -148,7 +146,6 @@ h1, h2, h3, h4 {
 }
 
 .filter-inner {
-    max-width: var(--max-width);
     margin: 0 auto;
     padding: 0 1rem;
     display: flex;
@@ -208,8 +205,6 @@ h1, h2, h3, h4 {
 
 /* Main Layout */
 #main-content {
-    max-width: var(--max-width);
-    margin: 0 auto;
     padding: 1rem;
     display: flex;
     gap: 1rem;
@@ -219,7 +214,7 @@ h1, h2, h3, h4 {
 
 /* Namespace Sidebar */
 #namespace-sidebar {
-    width: 240px;
+    width: 220px;
     flex-shrink: 0;
     max-height: calc(100vh - 160px);
     overflow-y: auto;
@@ -304,6 +299,15 @@ h1, h2, h3, h4 {
 #event-list-panel {
     flex: 1;
     min-width: 0;
+}
+
+/* When detail panel is visible: list = 1/3, detail = 2/3 of remaining space */
+#main-content:has(#event-detail-panel:not(.hidden)) #event-list-panel {
+    flex: 1;
+}
+
+#main-content:has(#event-detail-panel:not(.hidden)) #event-detail-panel {
+    flex: 2;
 }
 
 #event-list {
@@ -434,8 +438,8 @@ h1, h2, h3, h4 {
 
 /* Event Detail Panel */
 #event-detail-panel {
-    width: 420px;
-    flex-shrink: 0;
+    flex: 2;
+    min-width: 0;
     max-height: calc(100vh - 160px);
     overflow-y: auto;
     position: sticky;
@@ -692,8 +696,7 @@ mark {
 
 /* Responsive */
 @media (max-width: 1200px) {
-    #namespace-sidebar { width: 200px; }
-    #event-detail-panel { width: 360px; }
+    #namespace-sidebar { width: 180px; }
 }
 
 @media (max-width: 921px) {
