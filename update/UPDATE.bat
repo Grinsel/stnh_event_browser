@@ -1,0 +1,56 @@
+@echo off
+chcp 65001 >nul 2>&1
+setlocal
+
+echo ============================================
+echo  STNH Event Browser - Full Update
+echo ============================================
+echo.
+
+cd /d "%~dp0"
+
+echo [1/2] Running UPDATE_EVENTS.py ...
+echo.
+python UPDATE_EVENTS.py
+if %ERRORLEVEL% neq 0 (
+    echo.
+    echo ============================================
+    echo  ERROR: Pipeline failed! Aborting.
+    echo ============================================
+    pause
+    exit /b 1
+)
+
+echo.
+echo [2/2] Git commit + push ...
+echo.
+cd /d "%~dp0.."
+
+git add assets/ pictures/
+git diff --cached --quiet
+if %ERRORLEVEL% equ 0 (
+    echo No changes to commit.
+) else (
+    git commit -m "Update event browser - %date% %time:~0,8%"
+    if %ERRORLEVEL% neq 0 (
+        echo.
+        echo ERROR: git commit failed!
+        pause
+        exit /b 1
+    )
+    git push
+    if %ERRORLEVEL% neq 0 (
+        echo.
+        echo ERROR: git push failed!
+        pause
+        exit /b 1
+    )
+    echo.
+    echo Push successful - GitHub Pages deployment triggered.
+)
+
+echo.
+echo ============================================
+echo  Done!
+echo ============================================
+pause
