@@ -76,17 +76,16 @@
     }
 
     // Font size control
-    const fontSlider = document.getElementById('font-size-slider');
-    const savedSize = localStorage.getItem('stnh_eb_fontsize');
-    if (savedSize) {
-        fontSlider.value = savedSize;
-        document.documentElement.style.setProperty('--base-font-size', savedSize + '%');
+    let fontSize = parseInt(localStorage.getItem('stnh_eb_fontsize')) || 118;
+    document.documentElement.style.setProperty('--base-font-size', fontSize + '%');
+
+    function adjustFontSize(delta) {
+        fontSize = Math.min(160, Math.max(90, fontSize + delta));
+        document.documentElement.style.setProperty('--base-font-size', fontSize + '%');
+        localStorage.setItem('stnh_eb_fontsize', fontSize);
     }
-    fontSlider.addEventListener('input', (e) => {
-        const size = e.target.value;
-        document.documentElement.style.setProperty('--base-font-size', size + '%');
-        localStorage.setItem('stnh_eb_fontsize', size);
-    });
+    document.getElementById('font-size-down').addEventListener('click', () => adjustFontSize(-10));
+    document.getElementById('font-size-up').addEventListener('click', () => adjustFontSize(10));
 
     // Wire up UI events
     let searchTimeout;

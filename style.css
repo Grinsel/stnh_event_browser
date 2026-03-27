@@ -721,43 +721,23 @@ mark {
 .font-size-control {
     display: flex;
     align-items: center;
-    gap: 0.35rem;
+    gap: 0.2rem;
 }
 
-.font-size-control label {
+.font-size-control button {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #e4e7eb;
+    border-radius: 3px;
+    padding: 0.15rem 0.4rem;
     font-size: 0.7rem;
-    color: rgba(255,255,255,0.5);
-    white-space: nowrap;
+    cursor: pointer;
+    line-height: 1;
+    transition: background 0.2s;
 }
 
-.font-size-control input[type="range"] {
-    width: 70px;
-    height: 4px;
-    -webkit-appearance: none;
-    appearance: none;
-    background: rgba(255,255,255,0.15);
-    border-radius: 2px;
-    outline: none;
-    cursor: pointer;
-}
-
-.font-size-control input[type="range"]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #d1ce04;
-    cursor: pointer;
-}
-
-.font-size-control input[type="range"]::-moz-range-thumb {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    background: #d1ce04;
-    border: none;
-    cursor: pointer;
+.font-size-control button:hover {
+    background: rgba(209, 206, 4, 0.3);
 }
 
 /* Responsive */
