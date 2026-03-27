@@ -11,13 +11,14 @@ from config import MOD_INTERFACE_DIR, OUTPUT_ASSETS_DIR
 
 # Regex to extract sprite definitions from .gfx files
 # Handles both spriteType and frameAnimatedSpriteType
+# Captures the full block so we can extract noOfFrames separately
 SPRITE_RE = re.compile(
-    r'(?:spriteType|frameAnimatedSpriteType)\s*=\s*\{'
-    r'[^}]*?name\s*=\s*"?(\S+?)"?\s+'
-    r'[^}]*?texturefile\s*=\s*"?([^"\s}]+)"?'
-    r'[^}]*?\}',
+    r'(?:spriteType|frameAnimatedSpriteType)\s*=\s*\{([^}]*?name\s*=\s*"?\S+?"?\s+[^}]*?texturefile\s*=\s*"?[^"\s}]+"?[^}]*?)\}',
     re.DOTALL
 )
+NAME_RE = re.compile(r'name\s*=\s*"?(\S+?)"?\s')
+TEXTURE_RE = re.compile(r'texturefile\s*=\s*"?([^"\s}]+)"?')
+FRAMES_RE = re.compile(r'noOfFrames\s*=\s*(\d+)')
 
 
 def parse_gfx_mappings():
@@ -40,15 +41,26 @@ def parse_gfx_mappings():
             continue
 
         for match in SPRITE_RE.finditer(content):
-            name = match.group(1)
-            texture = match.group(2)
+            block = match.group(1)
+            name_m = NAME_RE.search(block)
+            tex_m = TEXTURE_RE.search(block)
+            if not name_m or not tex_m:
+                continue
+            name = name_m.group(1)
+            texture = tex_m.group(1)
             # Extract just the filename from the path
             texture_name = os.path.basename(texture)
             if texture_name.endswith('.dds'):
                 texture_name = texture_name[:-4]  # strip .dds
+            # Extract noOfFrames if present
+            frames = 1
+            frames_m = FRAMES_RE.search(block)
+            if frames_m:
+                frames = int(frames_m.group(1))
             mappings[name] = {
                 'texture_path': texture,
                 'texture_name': texture_name,
+                'frames': frames,
             }
 
     return mappings

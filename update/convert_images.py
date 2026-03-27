@@ -13,8 +13,8 @@ from config import (
 
 
 def get_referenced_pictures(events_index_path, pictures_map_path):
-    """Get set of texture names that are actually used by events."""
-    referenced = set()
+    """Get dict of texture_name -> frames for pictures used by events."""
+    referenced = {}
 
     # Load index
     with open(events_index_path, 'r', encoding='utf-8') as f:
@@ -31,10 +31,11 @@ def get_referenced_pictures(events_index_path, pictures_map_path):
     with open(pictures_map_path, 'r', encoding='utf-8') as f:
         gfx_map = json.load(f)
 
-    # Map GFX names to texture filenames
+    # Map GFX names to texture filenames + frame count
     for pic_ref in pic_refs:
         if pic_ref in gfx_map:
-            referenced.add(gfx_map[pic_ref]['texture_name'])
+            entry = gfx_map[pic_ref]
+            referenced[entry['texture_name']] = entry.get('frames', 1)
 
     return referenced
 
@@ -52,6 +53,9 @@ def convert_images(force=False):
 
     referenced = get_referenced_pictures(events_index_path, pictures_map_path)
     print(f"  Referenced pictures: {len(referenced)}")
+
+    animated_count = sum(1 for f in referenced.values() if f > 1)
+    print(f"  Animated (multi-frame): {animated_count}")
 
     if not os.path.isdir(MOD_GFX_EVENT_PICTURES):
         print(f"  [ERROR] Event pictures directory not found: {MOD_GFX_EVENT_PICTURES}")
@@ -75,11 +79,40 @@ def convert_images(force=False):
             continue
 
         input_path = os.path.join(MOD_GFX_EVENT_PICTURES, fn)
+        num_frames = referenced[base_name]
+
         try:
-            result = subprocess.run(
-                ['magick', input_path, '-resize', '480x300!', '-quality', '80', output_path],
-                capture_output=True, text=True, timeout=30
-            )
+            if num_frames > 1:
+                # Sprite sheet: get dimensions, crop first frame, then resize
+                # First get the image dimensions
+                id_result = subprocess.run(
+                    ['magick', 'identify', '-format', '%w %h', input_path],
+                    capture_output=True, text=True, timeout=30
+                )
+                if id_result.returncode != 0:
+                    stats['failed'] += 1
+                    stats['errors'].append(f"{fn}: identify failed: {id_result.stderr[:200]}")
+                    continue
+
+                dims = id_result.stdout.strip().split()
+                total_width = int(dims[0])
+                height = int(dims[1])
+                frame_width = total_width // num_frames
+
+                # Crop first frame then resize to 480x300
+                result = subprocess.run(
+                    ['magick', input_path,
+                     '-crop', f'{frame_width}x{height}+0+0', '+repage',
+                     '-resize', '480x300!', '-quality', '80', output_path],
+                    capture_output=True, text=True, timeout=30
+                )
+            else:
+                # Single frame: just resize
+                result = subprocess.run(
+                    ['magick', input_path, '-resize', '480x300!', '-quality', '80', output_path],
+                    capture_output=True, text=True, timeout=30
+                )
+
             if result.returncode == 0:
                 stats['converted'] += 1
             else:
