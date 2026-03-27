@@ -123,13 +123,15 @@
         const index = DataManager.getEventsIndex();
         const filtered = Filters.apply(index, state);
 
-        // Sort
-        filtered.sort((a, b) => {
-            const nsA = a.ns || '';
-            const nsB = b.ns || '';
-            if (nsA !== nsB) return nsA.localeCompare(nsB);
-            return a.id.localeCompare(b.id);
-        });
+        // Sort (skip if searching - Filters.apply handles the order)
+        if (!state.search) {
+            filtered.sort((a, b) => {
+                const nsA = a.ns || '';
+                const nsB = b.ns || '';
+                if (nsA !== nsB) return nsA.localeCompare(nsB);
+                return a.id.localeCompare(b.id);
+            });
+        }
 
         // Update stats
         document.getElementById('filter-stats').textContent =

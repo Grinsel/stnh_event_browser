@@ -261,6 +261,8 @@ h1, h2, h3, h4 {
 .ns-faction-label .count {
     font-size: 0.6rem;
     color: var(--text-muted);
+    flex-shrink: 0;
+    margin-right: 0.5rem;
 }
 
 .ns-list {
@@ -293,6 +295,8 @@ h1, h2, h3, h4 {
     background: rgba(255,255,255,0.08);
     padding: 0.05rem 0.25rem;
     border-radius: 8px;
+    flex-shrink: 0;
+    margin-right: 0.5rem;
 }
 
 /* Event List */
@@ -477,13 +481,13 @@ h1, h2, h3, h4 {
 #detail-close:hover { color: var(--text-primary); }
 
 .detail-picture {
-    width: 100%;
     border-radius: 4px;
     margin-bottom: 0.75rem;
 }
 
 .detail-picture img {
-    width: 100%;
+    max-width: 480px;
+    height: auto;
     border-radius: 4px;
 }
 
@@ -655,6 +659,25 @@ h1, h2, h3, h4 {
     color: var(--text-muted);
     border-top: 1px solid rgba(255,255,255,0.05);
     margin-top: auto;
+}
+
+/* Search section divider */
+.search-section-divider {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.75rem;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent-gold);
+}
+
+.search-section-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(209, 206, 4, 0.3);
 }
 
 /* Search Highlight */

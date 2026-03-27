@@ -20,7 +20,13 @@ const EventList = (() => {
             return;
         }
 
-        listEl.innerHTML = pageEvents.map(e => Render.eventCard(e, query)).join('');
+        listEl.innerHTML = pageEvents.map(e => {
+            let prefix = '';
+            if (e._searchDivider) {
+                prefix = '<div class="search-section-divider">Other namespaces</div>';
+            }
+            return prefix + Render.eventCard(e, query);
+        }).join('');
 
         // Attach click handlers
         listEl.querySelectorAll('.event-card').forEach(card => {
