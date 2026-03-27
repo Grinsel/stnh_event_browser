@@ -74,10 +74,11 @@ stnh_event_browser/
 ├── assets/                          # [GENERIERT] JSON-Daten
 │   ├── events_index.json           # Leichtgewichtiger Event-Index (2,6 MB)
 │   ├── namespaces.json             # Namespace-Metadaten (Faction, Category)
-│   ├── relationships.json          # Event-Trigger-Graph (650 KB)
+│   ├── relationships.json          # Event-Trigger-Graph (635 KB)
 │   ├── on_actions.json             # On-Action → Event Mappings
 │   ├── event_chains.json           # Event-Chain-Definitionen
-│   ├── pictures_map.json           # GFX-Name → Textur-Pfad (781 KB)
+│   ├── pictures_map.json           # GFX-Name → Textur-Pfad (647 KB)
+│   ├── last_update.json            # Timestamp + Phasen-Statistiken
 │   ├── events_detail/              # Detail-JSONs pro Namespace (272 Dateien)
 │   │   ├── STH_federation_flavour.json
 │   │   ├── STH_klingon_story.json
@@ -111,10 +112,11 @@ stnh_event_browser/
 │
 ├── update/                          # Python Daten-Pipeline
 │   ├── UPDATE_EVENTS.py            # Master-Script (7 Phasen)
-│   ├── UPDATE.bat                  # Ein-Klick Update + Deploy
-│   ├── UPDATE_QUICK.bat            # Schnell-Update ohne Bilder
+│   ├── UPDATE.bat                  # Ein-Klick Update + Deploy (goto-basiert)
+│   ├── UPDATE_QUICK.bat            # Schnell-Update ohne Bilder (goto-basiert)
 │   ├── config.py                   # Pfade & Konfiguration
 │   ├── parse_pdx.py               # Rekursiver PDX-Parser
+│   ├── lex_pdx.py                 # (Legacy) PLY-Lexer, nicht mehr verwendet
 │   ├── parse_events.py            # Event-Extraktion
 │   ├── parse_localisation.py      # Lokalisierungs-Parser
 │   ├── parse_gfx_mappings.py      # GFX Sprite-Mappings
@@ -436,7 +438,7 @@ Single-Page-Application ohne Build-Tools, Frameworks oder npm. Vanilla HTML/CSS/
 
 ```
 ┌──────────────────────────────────────────────────┐
-│ Header: Logo | Suchfeld | Sprach-Dropdown        │
+│ Header: Logo | Suchfeld | Sprach-Dropdown | Text ±│
 ├──────────────────────────────────────────────────┤
 │ Filter-Bar: Typ | Faction | Kategorie | Toggles  │
 ├────────┬─────────────────────────┬───────────────┤
@@ -511,7 +513,7 @@ const AppState = (() => {
 })();
 ```
 
-**Persistenz:** Spracheinstellung wird in `localStorage['stnh_eb_lang']` gespeichert.
+**Persistenz:** Spracheinstellung wird in `localStorage['stnh_eb_lang']` gespeichert, Schriftgröße in `localStorage['stnh_eb_fontsize']`.
 
 #### `js/i18n.js` - Internationalisierung
 
@@ -592,7 +594,8 @@ const NamespaceNav = (() => {
     updateActive()             // → Aktiven Namespace hervorheben
 
     // Gruppierung: Factions (klappbar) → Namespaces (mit Event-Count)
-    // Sortierung: Factions nach Event-Anzahl, 'generic' immer zuletzt
+    // Sortierung: Factions alphabetisch, 'generic' immer zuletzt
+    // Namespaces innerhalb einer Faction alphabetisch
     // Neue Factions werden automatisch erkannt!
 })();
 ```
@@ -619,16 +622,26 @@ const ChainViewer = (() => {
 // 6. EventDetail + ChainViewer init
 // 7. Initiales Rendering
 
+// Font-Size-Control:
+// - "Text −/+" Buttons im Header (rechts neben Sprach-Dropdown)
+// - Bereich: 90% bis 160%, Schritte: ±10%
+// - Default: 118%, gespeichert in localStorage['stnh_eb_fontsize']
+// - Skaliert gesamte UI über CSS-Variable --base-font-size
+
 // Event-Listener:
 // - Suchfeld (200ms Debounce)
 // - Filter-Dropdowns
 // - Sprach-Auswahl
+// - Font-Size Buttons (−/+)
 // - AppState onChange → renderAll()
 ```
 
 ### 4.4 `style.css` - Design-System
 
 ```css
+/* Basis-Schriftgröße (dynamisch per JS steuerbar) */
+html { font-size: var(--base-font-size, 118%); }
+
 /* Farbschema */
 --bg:      #111111        /* Hintergrund */
 --text:    #e4e7eb        /* Text */
@@ -663,11 +676,12 @@ Tungsten-Light.ttf          /* Badges und Labels */
 | `events_index.json` | 2,6 MB | Alle Events (kompakt): id, name, type, ns, pic, snippet, flags |
 | `events_detail/{ns}.json` | ~4 MB | Volle Event-Daten pro Namespace (272 Dateien) |
 | `namespaces.json` | 42 KB | Namespace → faction, category, source_files, event_count |
-| `relationships.json` | 650 KB | Event-Trigger-Graph (bidirektional) |
+| `relationships.json` | 635 KB | Event-Trigger-Graph (bidirektional) |
 | `on_actions.json` | 30 KB | on_action → [event_ids] |
 | `event_chains.json` | 12 KB | Chain-Definitionen |
-| `pictures_map.json` | 781 KB | GFX-Name → {texturefile, frames} (3.960 Sprites) |
+| `pictures_map.json` | 647 KB | GFX-Name → {texturefile, frames} (3.960 Sprites) |
 | `localisation/{lang}.json` | ~100 KB | Gefilterte Loc-Keys (~10k pro Sprache) |
+| `last_update.json` | ~1 KB | Timestamp + Phasen-Statistiken |
 | `pictures/*.webp` | 8,1 MB | 731 WebP-Bilder (480×300, Q80) |
 
 ---
@@ -769,6 +783,19 @@ EVENT_BROWSER_ROOT = r"D:\Projects\stnh_event_browser" # Browser-Repo
    ```css
    .type-badge.neuer_event { background: #farbe; }
    ```
+
+### Schriftgröße anpassen
+
+Die Basis-Schriftgröße ist über eine CSS-Variable `--base-font-size` steuerbar.
+Da alle Größen in `rem` definiert sind, skaliert die gesamte UI proportional.
+
+- **Benutzer:** Text −/+ Buttons im Header (rechts neben Sprach-Dropdown)
+- **Entwickler:** Default in `style.css` ändern:
+  ```css
+  html { font-size: var(--base-font-size, 118%); }  /* 118% = Default */
+  ```
+- **Bereich:** 90% – 160% (in 10%-Schritten)
+- **Persistenz:** `localStorage['stnh_eb_fontsize']`
 
 ### Bilder-Qualität / Größe ändern
 
