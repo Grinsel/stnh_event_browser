@@ -16,8 +16,10 @@ const NamespaceNav = (() => {
             byFaction[faction].push(meta);
         }
 
-        // Sort factions by total event count
+        // Sort factions by total event count, but 'generic' always last
         const factionOrder = Object.keys(byFaction).sort((a, b) => {
+            if (a === 'generic') return 1;
+            if (b === 'generic') return -1;
             const countA = byFaction[a].reduce((s, m) => s + m.event_count, 0);
             const countB = byFaction[b].reduce((s, m) => s + m.event_count, 0);
             return countB - countA;
@@ -27,7 +29,7 @@ const NamespaceNav = (() => {
         for (const faction of factionOrder) {
             const items = byFaction[faction].sort((a, b) => a.name.localeCompare(b.name));
             const totalCount = items.reduce((s, m) => s + m.event_count, 0);
-            const isExpanded = expanded[faction] !== false; // default expanded
+            const isExpanded = expanded[faction] === true; // default collapsed
 
             html += `<div class="ns-faction-group">`;
             html += `<div class="ns-faction-label" data-faction="${faction}">
@@ -51,9 +53,9 @@ const NamespaceNav = (() => {
         document.querySelectorAll('.ns-faction-label').forEach(el => {
             el.addEventListener('click', () => {
                 const faction = el.dataset.faction;
-                expanded[faction] = !expanded[faction] !== false ? false : true;
+                expanded[faction] = !expanded[faction];
                 const list = document.querySelector(`[data-faction-list="${faction}"]`);
-                if (list) list.style.display = expanded[faction] === false ? 'none' : '';
+                if (list) list.style.display = expanded[faction] ? '' : 'none';
             });
         });
 
