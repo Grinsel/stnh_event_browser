@@ -16,13 +16,11 @@ const NamespaceNav = (() => {
             byFaction[faction].push(meta);
         }
 
-        // Sort factions by total event count, but 'generic' always last
+        // Sort factions alphabetically, 'generic' always last
         const factionOrder = Object.keys(byFaction).sort((a, b) => {
             if (a === 'generic') return 1;
             if (b === 'generic') return -1;
-            const countA = byFaction[a].reduce((s, m) => s + m.event_count, 0);
-            const countB = byFaction[b].reduce((s, m) => s + m.event_count, 0);
-            return countB - countA;
+            return a.localeCompare(b);
         });
 
         let html = '';
