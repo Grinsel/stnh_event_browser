@@ -12,14 +12,7 @@ cd /d "%~dp0"
 echo [1/2] Running UPDATE_EVENTS.py --skip-images ...
 echo.
 python UPDATE_EVENTS.py --skip-images
-if %ERRORLEVEL% neq 0 (
-    echo.
-    echo ============================================
-    echo  ERROR: Pipeline failed! Aborting.
-    echo ============================================
-    pause
-    exit /b 1
-)
+if %ERRORLEVEL% neq 0 goto :pipeline_failed
 
 echo.
 echo [2/2] Git commit + push ...
@@ -30,25 +23,40 @@ git add assets/
 git diff --cached --quiet
 if %ERRORLEVEL% equ 0 (
     echo No changes to commit.
-) else (
-    git commit -m "Update event browser (quick) - %date% %time:~0,8%"
-    if %ERRORLEVEL% neq 0 (
-        echo.
-        echo ERROR: git commit failed!
-        pause
-        exit /b 1
-    )
-    git push
-    if %ERRORLEVEL% neq 0 (
-        echo.
-        echo ERROR: git push failed!
-        pause
-        exit /b 1
-    )
-    echo.
-    echo Push successful - GitHub Pages deployment triggered.
+    goto :done
 )
 
+git commit -m "Update event browser (quick) - %date% %time:~0,8%"
+if %ERRORLEVEL% neq 0 goto :commit_failed
+
+git push
+if %ERRORLEVEL% neq 0 goto :push_failed
+
+echo.
+echo Push successful - GitHub Pages deployment triggered.
+goto :done
+
+:pipeline_failed
+echo.
+echo ============================================
+echo  ERROR: Pipeline failed! Aborting.
+echo ============================================
+pause
+exit /b 1
+
+:commit_failed
+echo.
+echo ERROR: git commit failed!
+pause
+exit /b 1
+
+:push_failed
+echo.
+echo ERROR: git push failed!
+pause
+exit /b 1
+
+:done
 echo.
 echo ============================================
 echo  Done!
