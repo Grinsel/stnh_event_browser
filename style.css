@@ -24,7 +24,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html {
-    font-size: 100%;
+    font-size: var(--base-font-size, 118%);
 }
 
 body {
@@ -717,13 +717,56 @@ mark {
 ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
 
+/* Font Size Control */
+.font-size-control {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.font-size-control label {
+    font-size: 0.7rem;
+    color: rgba(255,255,255,0.5);
+    white-space: nowrap;
+}
+
+.font-size-control input[type="range"] {
+    width: 70px;
+    height: 4px;
+    -webkit-appearance: none;
+    appearance: none;
+    background: rgba(255,255,255,0.15);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+}
+
+.font-size-control input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #d1ce04;
+    cursor: pointer;
+}
+
+.font-size-control input[type="range"]::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: #d1ce04;
+    border: none;
+    cursor: pointer;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
     #namespace-sidebar { width: 180px; }
 }
 
 @media (max-width: 921px) {
-    html { font-size: 100%; }
+    html { font-size: var(--base-font-size, 118%); }
 
     .header-inner { flex-wrap: wrap; }
     .header-search { order: 3; max-width: 100%; flex-basis: 100%; }

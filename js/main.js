@@ -75,6 +75,19 @@
         return;
     }
 
+    // Font size control
+    const fontSlider = document.getElementById('font-size-slider');
+    const savedSize = localStorage.getItem('stnh_eb_fontsize');
+    if (savedSize) {
+        fontSlider.value = savedSize;
+        document.documentElement.style.setProperty('--base-font-size', savedSize + '%');
+    }
+    fontSlider.addEventListener('input', (e) => {
+        const size = e.target.value;
+        document.documentElement.style.setProperty('--base-font-size', size + '%');
+        localStorage.setItem('stnh_eb_fontsize', size);
+    });
+
     // Wire up UI events
     let searchTimeout;
     document.getElementById('search-input').addEventListener('input', (e) => {
