@@ -17,10 +17,6 @@
                 <input type="text" id="search-input" placeholder="Search events... (id:, ns:, faction:)" autocomplete="off">
             </div>
             <div class="header-controls">
-                <div class="font-size-control">
-                    <button id="font-size-down" title="Smaller text">A−</button>
-                    <button id="font-size-up" title="Larger text">A+</button>
-                </div>
                 <select id="lang-select" title="Language">
                     <option value="english">English</option>
                     <option value="german">Deutsch</option>
@@ -30,6 +26,11 @@
                     <option value="polish">Polski</option>
                     <option value="braz_por">Português</option>
                 </select>
+                <div class="font-size-control" title="Text Size">
+                    <span class="font-size-label">Text</span>
+                    <button id="font-size-down" aria-label="Decrease text size">−</button>
+                    <button id="font-size-up" aria-label="Increase text size">+</button>
+                </div>
             </div>
         </div>
     </header>
