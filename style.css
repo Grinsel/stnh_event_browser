@@ -760,6 +760,40 @@ mark {
     border-color: rgba(209, 206, 4, 0.5);
 }
 
+/* iframe embed mode: constrain to viewport so internal scrolling works */
+body.in-iframe {
+    height: 100vh;
+    overflow: hidden;
+}
+
+body.in-iframe #main-content {
+    min-height: 0;
+    overflow: hidden;
+}
+
+body.in-iframe #event-list-panel {
+    min-height: 0;
+    overflow-y: auto;
+}
+
+body.in-iframe #namespace-sidebar {
+    position: static;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+}
+
+body.in-iframe #event-detail-panel {
+    position: static;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+}
+
+body.in-iframe #site-footer {
+    display: none;
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
     #namespace-sidebar { width: 180px; }
