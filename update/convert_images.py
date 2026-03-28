@@ -99,17 +99,42 @@ def convert_images(force=False):
                 height = int(dims[1])
                 frame_width = total_width // num_frames
 
-                # Crop first frame then resize to 480x300
-                result = subprocess.run(
-                    ['magick', input_path,
-                     '-crop', f'{frame_width}x{height}+0+0', '+repage',
-                     '-resize', '480x300!', '-quality', '80', output_path],
+                # Sanity check: frame aspect ratio should be ~2.35:1 (620:264)
+                # If not, the frame count is wrong — treat as single image
+                frame_ratio = frame_width / height if height > 0 else 0
+                if frame_ratio < 1.5 or frame_ratio > 3.5:
+                    result = subprocess.run(
+                        ['magick', input_path, '-resize', '480x', '-quality', '80', output_path],
+                        capture_output=True, text=True, timeout=30
+                    )
+                else:
+                    # Crop first frame then resize (width 480, keep aspect ratio)
+                    result = subprocess.run(
+                        ['magick', input_path,
+                         '-crop', f'{frame_width}x{height}+0+0', '+repage',
+                         '-resize', '480x', '-quality', '80', output_path],
+                        capture_output=True, text=True, timeout=30
+                    )
+            else:
+                # Single frame: if aspect ratio is too wide, it's likely a
+                # sprite sheet with wrong frame count — auto-detect frame width
+                id_result = subprocess.run(
+                    ['magick', 'identify', '-format', '%w %h', input_path],
                     capture_output=True, text=True, timeout=30
                 )
-            else:
-                # Single frame: just resize
+                crop_cmd = []
+                if id_result.returncode == 0:
+                    dims = id_result.stdout.strip().split()
+                    w, h = int(dims[0]), int(dims[1])
+                    ratio = w / h if h > 0 else 0
+                    if ratio > 3.5:
+                        # Likely a sprite sheet — guess frame width ≈ height * 2.35
+                        frame_w = round(h * 2.348)
+                        crop_cmd = ['-crop', f'{frame_w}x{h}+0+0', '+repage']
+
                 result = subprocess.run(
-                    ['magick', input_path, '-resize', '480x300!', '-quality', '80', output_path],
+                    ['magick', input_path] + crop_cmd +
+                    ['-resize', '480x', '-quality', '80', output_path],
                     capture_output=True, text=True, timeout=30
                 )
 
