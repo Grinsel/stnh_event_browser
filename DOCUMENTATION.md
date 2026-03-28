@@ -27,7 +27,7 @@ Ein Single-Page-Application (SPA) zur Darstellung aller ~8.867 Events des STNH S
 | Event-Dateien | 430 (0 Parse-Fehler) |
 | Namespaces | 287 |
 | Sprachen | 7 (EN, DE, FR, ES, RU, PL, BR-PT) |
-| Event-Bilder | 731 WebP (8,1 MB) |
+| Event-Bilder | 731 WebP, 480×204 (~6 MB) |
 | GFX Sprites | 3.960 gesamt, 728 Event-Bilder |
 | Pipeline-Laufzeit | ~11 Sekunden |
 | Frontend | Vanilla HTML/CSS/JS (~12 KB JS, ~16 KB CSS) |
@@ -415,7 +415,7 @@ def convert_event_images(gfx_mappings, events) → stats:
 
     - Animierte Sprites (frames > 1): Erster Frame wird zugeschnitten
     - Einzelbilder: Direkte Konvertierung
-    - Resize: 480x300, Qualität 80
+    - Resize: 480px Breite, proportionale Höhe (480x204 bei 620x264 Originalen), Qualität 80
     - Nur neue/geänderte Bilder werden konvertiert (Timestamp-Check)
     """
 ```
@@ -697,7 +697,7 @@ Tungsten-Light.ttf          /* Badges und Labels */
 | `pictures_map.json` | 647 KB | GFX-Name → {texturefile, frames} (3.960 Sprites) |
 | `localisation/{lang}.json` | ~100 KB | Gefilterte Loc-Keys (~10k pro Sprache) |
 | `last_update.json` | ~1 KB | Timestamp + Phasen-Statistiken |
-| `pictures/*.webp` | 8,1 MB | 731 WebP-Bilder (480×300, Q80) |
+| `pictures/*.webp` | ~6 MB | 731 WebP-Bilder (480×204, Q80) |
 
 ---
 
@@ -815,7 +815,7 @@ Da alle Größen in `rem` definiert sind, skaliert die gesamte UI proportional.
 ### Bilder-Qualität / Größe ändern
 
 In `convert_images.py` die ImageMagick-Parameter anpassen:
-- Zielgröße: `480x300` (resize Parameter)
+- Zielbreite: `480` (resize Parameter, Höhe proportional — ergibt 480x204 bei Stellaris-Standard 620x264)
 - Qualität: `80` (quality Parameter)
 
 ---
