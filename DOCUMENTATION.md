@@ -315,6 +315,14 @@ def parse_all_languages() → {lang: {key: value}}
     # Regex: key:0 "value" oder key: "value"
     # Encoding: UTF-8-SIG mit latin-1 Fallback
     # Format-Codes (§R, §W, etc.) werden entfernt
+
+def resolve_variable_refs(loc_data) → dict
+    """Löst $key$-Referenzen rekursiv auf.
+    Stellaris-Loc nutzt $other_key$ um Text aus anderen Keys einzubetten.
+    z.B. ancrel.8021.desc = "$ancrel.8020.intro$\n\n$ancrel.8020.failure$"
+    → wird zu vollem Text aufgelöst.
+    Konvertiert auch literale \\n zu echten Newlines.
+    Loop-Protection verhindert Endlos-Rekursion."""
 ```
 
 **Bekanntes Problem:** Einige `.yml`-Dateien haben Encoding-Probleme. Der Parser versucht zuerst UTF-8-SIG, dann latin-1 als Fallback.
@@ -628,12 +636,19 @@ const ChainViewer = (() => {
 // - Default: 118%, gespeichert in localStorage['stnh_eb_fontsize']
 // - Skaliert gesamte UI über CSS-Variable --base-font-size
 
+// iframe-Einbettung (WordPress):
+// - notifyParentHeight() sendet document.body.scrollHeight per postMessage
+// - Aufgerufen nach jedem renderAll() und per ResizeObserver auf body
+// - Nur aktiv wenn window.parent !== window (= eingebettet in iframe)
+// - Parent empfängt {type: 'stnh-resize', height: N} und setzt iframe-Höhe
+
 // Event-Listener:
 // - Suchfeld (200ms Debounce)
 // - Filter-Dropdowns
 // - Sprach-Auswahl
 // - Font-Size Buttons (−/+)
 // - AppState onChange → renderAll()
+// - ResizeObserver auf body (für iframe-Einbettung)
 ```
 
 ### 4.4 `style.css` - Design-System
@@ -835,7 +850,7 @@ In `convert_images.py` die ImageMagick-Parameter anpassen:
 | Faction falsch zugeordnet | `generate_events_json.py` → `FACTION_PATTERNS` |
 | Neue Events werden nicht erkannt | `parse_pdx.py` (Parser-Fehler?) oder `parse_events.py` |
 | Bilder fehlen | `parse_gfx_mappings.py` + `convert_images.py` prüfen |
-| Lokalisierung fehlt/falsch | `parse_localisation.py` (Encoding?) |
+| Lokalisierung fehlt/falsch | `parse_localisation.py` (Encoding? $key$-Referenzen?) |
 | Filter funktioniert nicht | `js/filters.js` |
 | Styling anpassen | `style.css` |
 
