@@ -150,5 +150,19 @@
             `${filtered.length} / ${index.length} events`;
 
         EventList.render(filtered, state.page || 1, state.search);
+        notifyParentHeight();
+    }
+
+    // Notify parent iframe of content height for dynamic embedding
+    function notifyParentHeight() {
+        if (window.parent !== window) {
+            window.parent.postMessage({ type: 'stnh-resize', height: document.body.scrollHeight }, '*');
+        }
+    }
+
+    // ResizeObserver to catch height changes from detail panel, sidebar toggle, etc.
+    if (window.parent !== window) {
+        const ro = new ResizeObserver(() => notifyParentHeight());
+        ro.observe(document.body);
     }
 })();

@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-03-28T07:30:37.027672",
-  "elapsed_seconds": 10.5,
+  "timestamp": "2026-03-28T08:09:33.810663",
+  "elapsed_seconds": 12.1,
   "results": {
     "localisation": {
       "english": 203900,
@@ -19832,7 +19832,11 @@
       "loc_keys_filtered": 23035
     },
     "images": {
-      "skipped": true
+      "total": 731,
+      "converted": 0,
+      "skipped": 731,
+      "failed": 0,
+      "errors": []
     }
   }
 }

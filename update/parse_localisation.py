@@ -50,6 +50,43 @@ def parse_localisation_file(filepath):
     return result
 
 
+VAR_REF_RE = re.compile(r'\$([^$]+)\$')
+
+
+def resolve_variable_refs(loc_data):
+    """Recursively resolve $key$ variable references in localisation values.
+    Also converts literal \\n to real newlines."""
+    def _resolve(text, seen):
+        def replacer(match):
+            ref_key = match.group(1)
+            if ref_key in seen:
+                return match.group(0)  # prevent infinite loops
+            if ref_key in loc_data:
+                seen.add(ref_key)
+                return _resolve(loc_data[ref_key], seen)
+            return match.group(0)  # leave unresolved if key not found
+        return VAR_REF_RE.sub(replacer, text)
+
+    for key in loc_data:
+        if '$' in loc_data[key]:
+            loc_data[key] = _resolve(loc_data[key], {key})
+        # Convert literal \n to real newlines
+        loc_data[key] = loc_data[key].replace('\\n', '\n')
+
+    return loc_data
+
+
+def collect_referenced_keys(loc_data):
+    """Collect all keys referenced via $key$ in localisation values."""
+    refs = set()
+    for value in loc_data.values():
+        for match in VAR_REF_RE.finditer(value):
+            ref_key = match.group(1)
+            if ref_key in loc_data:
+                refs.add(ref_key)
+    return refs
+
+
 def parse_all_languages():
     """Parse localisation files for all languages. Returns dict of lang -> {key: text}."""
     all_loc = {}
@@ -75,6 +112,9 @@ def parse_all_languages():
             file_data = parse_localisation_file(fp)
             lang_data.update(file_data)
             file_count += 1
+
+        # Resolve $key$ variable references
+        lang_data = resolve_variable_refs(lang_data)
 
         all_loc[lang] = lang_data
         stats[lang] = len(lang_data)
